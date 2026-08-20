@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bruce Firmware</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --bg:        #ecebe6;
+    --panel:     #f6f5f1;
+    --panel-2:   #e4e2da;
+    --ink:       #23211c;
+    --ink-soft:  #55524a;
+    --ink-faint: #837f74;
+    --line:      #d3d0c6;
+    --line-hard: #bfbbae;
+    --accent:    #c25a1a;
+    --accent-2:  #a8480f;
+    --signal:    #2f7d5b;
+    --offense:   #b0342b;
+    --chip-bg:   #e4e2da;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:        #131511;
+      --panel:     #1b1e19;
+      --panel-2:   #23261f;
+      --ink:       #e9e7dd;
+      --ink-soft:  #b3b0a4;
+      --ink-faint: #7f7c70;
+      --line:      #2e3229;
+      --line-hard: #3c4034;
+      --accent:    #f0a04b;
+      --accent-2:  #f6b76a;
+      --signal:    #6fd39c;
+      --offense:   #f0796d;
+      --chip-bg:   #23261f;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:        #131511;
+    --panel:     #1b1e19;
+    --panel-2:   #23261f;
+    --ink:       #e9e7dd;
+    --ink-soft:  #b3b0a4;
+    --ink-faint: #7f7c70;
+    --line:      #2e3229;
+    --line-hard: #3c4034;
+    --accent:    #f0a04b;
+    --accent-2:  #f6b76a;
+    --signal:    #6fd39c;
+    --offense:   #f0796d;
+    --chip-bg:   #23261f;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---- Masthead ---- */
+  header.top {
+    border-bottom: 2px solid var(--ink);
+    background:
+      repeating-linear-gradient(90deg, transparent 0 6px, color-mix(in srgb, var(--accent) 6%, transparent) 6px 7px);
+    background-color: var(--panel);
+  }
+  .masthead { padding: 40px 0 30px; }
+  .kicker {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .72rem; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--accent-2); font-weight: 600;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .kicker::before { content: ""; width: 26px; height: 2px; background: var(--accent); display: inline-block; }
+  h1 {
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 700; font-size: clamp(2.1rem, 6vw, 3.4rem);
+    margin: .35em 0 .2em; letter-spacing: -.01em; text-wrap: balance; line-height: 1.02;
+  }
+  .lede { max-width: 62ch; color: var(--ink-soft); font-size: 1.02rem; }
+  .lede b { color: var(--ink); font-weight: 600; }
+
+  .warn {
+    margin-top: 22px; padding: 12px 16px;
+    border: 1px solid var(--line-hard); border-left: 3px solid var(--offense);
+    background: var(--panel-2); border-radius: 3px;
+    font-size: .84rem; color: var(--ink-soft); max-width: 74ch;
+    font-family: "IBM Plex Mono", monospace;
+  }
+  .warn b { color: var(--ink); }
+
+  /* ---- Category nav ---- */
+  nav.toc {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  nav.toc .wrap { display: flex; gap: 4px; overflow-x: auto; padding: 9px 24px; }
+  nav.toc a {
+    flex: 0 0 auto;
+    font-family: "IBM Plex Mono", monospace; font-size: .74rem; font-weight: 500;
+    color: var(--ink-soft); text-decoration: none;
+    padding: 5px 11px; border: 1px solid transparent; border-radius: 3px; white-space: nowrap;
+  }
+  nav.toc a:hover { color: var(--ink); border-color: var(--line-hard); background: var(--panel); }
+
+  main { padding: 40px 0 80px; display: flex; flex-direction: column; gap: 40px; }
+
+  /* ---- Category block ---- */
+  section.cat { scroll-margin-top: 56px; }
+  .cat-head {
+    display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+    padding-bottom: 12px; margin-bottom: 20px;
+    border-bottom: 1px solid var(--line-hard);
+  }
+  .cat-num {
+    font-family: "IBM Plex Mono", monospace; font-size: .82rem; font-weight: 600;
+    color: var(--accent); letter-spacing: .05em;
+  }
+  .cat-head h2 {
+    font-family: "IBM Plex Mono", monospace; font-weight: 700;
+    font-size: 1.5rem; margin: 0; letter-spacing: -.01em;
+  }
+  .cat-tag {
+    font-family: "IBM Plex Mono", monospace; font-size: .7rem; letter-spacing: .08em;
+    color: var(--ink-faint); text-transform: uppercase; margin-left: auto;
+    border: 1px solid var(--line-hard); padding: 3px 9px; border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+
+  .app {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 4px; padding: 16px 17px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .app-name {
+    font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: .98rem;
+    display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
+  }
+  .app-name .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: 0 0 auto; }
+  .app-name.off .dot { background: var(--offense); }
+  .app-name.sig .dot { background: var(--signal); }
+  .badge {
+    font-size: .6rem; letter-spacing: .08em; text-transform: uppercase; font-weight: 600;
+    padding: 2px 6px; border-radius: 3px; font-family: "IBM Plex Mono", monospace;
+  }
+  .badge.off { color: var(--offense); border: 1px solid color-mix(in srgb, var(--offense) 45%, var(--line)); }
+  .badge.hw  { color: var(--ink-faint); border: 1px solid var(--line-hard); }
+  .app p { margin: 0; font-size: .89rem; color: var(--ink-soft); }
+  .prac {
+    font-size: .82rem; color: var(--ink); margin-top: 2px;
+    padding-left: 11px; border-left: 2px solid var(--accent);
+  }
+  .prac b {
+    font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: .72rem;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--accent-2);
+    display: block; margin-bottom: 2px;
+  }
+  .prac .dev { color: var(--ink); font-weight: 600; }
+
+  /* ---- Nested command tree ---- */
+  .cmds { margin-top: 4px; display: flex; flex-direction: column; gap: 0; }
+  .cmds-label {
+    font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: .68rem;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint);
+    margin-bottom: 5px;
+  }
+  .cmd {
+    display: grid; grid-template-columns: auto 1fr; gap: 8px;
+    padding: 5px 0 5px 14px; position: relative;
+    border-left: 1px solid var(--line-hard);
+  }
+  .cmd::before {
+    content: ""; position: absolute; left: 0; top: 13px;
+    width: 9px; height: 1px; background: var(--line-hard);
+  }
+  .cmd:last-child { border-left-color: transparent; }
+  .cmd:last-child::after {
+    content: ""; position: absolute; left: 0; top: 0; height: 13px;
+    width: 1px; background: var(--line-hard);
+  }
+  .cmd .cn {
+    font-family: "IBM Plex Mono", monospace; font-size: .78rem; font-weight: 600;
+    color: var(--ink); white-space: nowrap;
+  }
+  .cmd.att .cn { color: var(--offense); }
+  .cmd .cd { font-size: .78rem; color: var(--ink-soft); }
+  .cmd .cd .dev { color: var(--ink); font-weight: 600; }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 28px 0 60px; color: var(--ink-faint);
+    font-family: "IBM Plex Mono", monospace; font-size: .78rem;
+  }
+  footer a { color: var(--accent-2); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+</style>
+
+</head>
+<body>
+<header class="top">
+  <div class="wrap masthead">
+    <div class="kicker">Bruce Firmware · ESP32 · Справочник функций</div>
+    <h1>Меню Bruce: что делает каждый инструмент</h1>
+    <p class="lede">Прошивка <b>Bruce</b> превращает ESP32-устройство (M5Stick, Cardputer, Lilygo T-Embed и др.) в мультитул для работы с радио, RFID/NFC, ИК и сетями. Ниже — все пункты меню по категориям: коротко что делает и <b>практическое применение</b> с конкретными брелоками, картами и устройствами.</p>
+    <div class="warn"><b>Только для законного использования:</b> тестируйте на своих устройствах или с письменного разрешения владельца. Атаки на чужое оборудование и сети незаконны.</div>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="wrap">
+    <a href="#rf">RF</a>
+    <a href="#rfid">RFID/NFC</a>
+    <a href="#ir">IR</a>
+    <a href="#fm">FM</a>
+    <a href="#lora">LoRa</a>
+    <a href="#wifi">WiFi</a>
+    <a href="#ble">BLE</a>
+    <a href="#nrf">NRF24</a>
+    <a href="#eth">Ethernet</a>
+    <a href="#gps">GPS</a>
+    <a href="#others">Others</a>
+    <a href="#files">Files</a>
+    <a href="#connect">Connect</a>
+    <a href="#scripts">Scripts</a>
+    <a href="#clock">Clock</a>
+    <a href="#config">Config</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- RF -->
+  <section class="cat" id="rf">
+    <div class="cat-head"><span class="cat-num">01</span><h2>RF</h2><span class="cat-tag">Sub-GHz · 300–928 МГц · CC1101</span></div>
+    <div class="grid">
+      <div class="app"><div class="app-name sig"><span class="dot"></span>Scan/copy</div>
+        <p>Ловит сигнал пульта и сразу копирует его для повторной отправки.</p>
+        <div class="prac"><b>Практика</b>Клонирование брелоков ворот и шлагбаумов со <span class="dev">статическим кодом</span>: старые Came TOP-432NA, Nice Flo, Doorhan, BFT. Не работает с «прыгающим» кодом KeeLoq.</div>
+      </div>
+      <div class="app"><div class="app-name sig"><span class="dot"></span>Record RAW</div>
+        <p>Запись «сырого» сигнала целиком, без разбора протокола.</p>
+        <div class="prac"><b>Практика</b>Сохранение нестандартных сигналов: <span class="dev">беспроводные звонки, датчики TPMS в шинах, метеостанции, дешёвые радиорозетки</span>.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Custom SubGhz</div>
+        <p>Ручная отправка своего сигнала: частота, протокол и данные вручную.</p>
+        <div class="prac"><b>Практика</b>Отправка кода на <span class="dev">433.92 / 315 / 868 МГц</span> — например повтор ранее записанной команды радиорозетки.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Spectrum</div>
+        <p>Простой анализатор спектра — показывает активность на частоте.</p>
+        <div class="prac"><b>Практика</b>Проверить, на какой частоте (<span class="dev">433 или 868 МГц</span>) работает пульт, прежде чем копировать.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>RSSI Spectrum</div>
+        <p>Спектр с индикацией уровня сигнала (RSSI) для модуля CC1101.</p>
+        <div class="prac"><b>Практика</b>Поиск источника помех или направления на <span class="dev">работающий передатчик</span> по силе сигнала.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>SquareWave Spec</div>
+        <p>Показ сигнала в виде прямоугольной волны для анализа тайминга.</p>
+        <div class="prac"><b>Практика</b>Определить длину импульсов неизвестного протокола, чтобы декодировать <span class="dev">кастомный пульт</span>.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Spectogram</div>
+        <p>Водопадная диаграмма (waterfall) — частоты во времени.</p>
+        <div class="prac"><b>Практика</b>Наглядно поймать <span class="dev">кратковременные всплески</span> от брелока в шумном эфире.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Listen</div>
+        <p>Прослушивание эфира через динамик (демодуляция в звук).</p>
+        <div class="prac"><b>Практика</b>Аудиоконтроль активности на частоте — слышно, когда <span class="dev">кто-то нажимает пульт</span> рядом.</div>
+      </div>
+      <div class="app"><div class="app-name off"><span class="dot"></span>Bruteforce <span class="badge off">атака</span></div>
+        <p>Перебор кодов (де Брёйн) для устройств с фиксированным кодом.</p>
+        <div class="prac"><b>Практика</b>Открытие старых ворот с DIP-переключателями и <span class="dev">8–12-битным кодом</span> (ранние Came, Nice, Genie). Против rolling-code бесполезно.</div>
+      </div>
+      <div class="app"><div class="app-name off"><span class="dot"></span>Jammer <span class="badge off">атака</span></div>
+        <p>Глушилка — забивает выбранную частоту помехами.</p>
+        <div class="prac"><b>Практика</b>Тест устойчивости своей <span class="dev">433/868 МГц сигнализации</span> к подавлению (в лаборатории, не в эфире общего пользования).</div>
+      </div>
+      <div class="app"><div class="app-name hw"><span class="dot"></span>Config</div>
+        <p>Настройка пинов TX/RX, выбор модуля CC1101 и рабочей частоты.</p>
+        <div class="prac"><b>Практика</b>Переключение между <span class="dev">встроенным передатчиком и внешним CC1101</span> для большей дальности.</div>
+        <div class="cmds"><div class="cmds-label">Команды</div>
+          <div class="cmd"><span class="cn">RF TX Pin</span><span class="cd">пин передатчика</span></div>
+          <div class="cmd"><span class="cn">RF RX Pin</span><span class="cd">пин приёмника</span></div>
+          <div class="cmd"><span class="cn">RF Module</span><span class="cd">встроенный или <span class="dev">CC1101</span></span></div>
+          <div class="cmd"><span class="cn">RF Frequency</span><span class="cd">частота по умолчанию (433/315/868)</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RFID -->
+  <section class="cat" id="rfid">
+    <div class="cat-head"><span class="cat-num">02</span><h2>RFID / NFC</h2><span class="cat-tag">13.56 МГц · PN532 · RC522</span></div>
+    <div class="grid">
+      <div class="app"><div class="app-name"><span class="dot"></span>Read tag</div>
+        <p>Считывает UID и данные NFC-метки (TagOMatic) для копирования.</p>
+        <div class="prac"><b>Практика</b>Чтение <span class="dev">Mifare Classic 1K</span>: офисные пропуска, карты домофона, ключи гостиниц, транспортные карты.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Read EMV</div>
+        <p>Читает открытые данные с чипа банковской карты.</p>
+        <div class="prac"><b>Практика</b>С <span class="dev">Visa / Mastercard PayWave/PayPass</span> считываются номер карты (PAN) и срок действия — демонстрация рисков бесконтакта.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Read 125kHz</div>
+        <p>Чтение низкочастотных меток 125 кГц.</p>
+        <div class="prac"><b>Практика</b>Синие круглые брелоки-«таблетки» домофонов <span class="dev">EM4100 / TK4100</span>, а также карты <span class="dev">HID Prox, Indala</span>.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Scan tags</div>
+        <p>Режим последовательного сканирования нескольких меток.</p>
+        <div class="prac"><b>Практика</b>Быстро проверить связку <span class="dev">пропусков и брелоков</span>, не заходя в чтение по одной.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Load file</div>
+        <p>Загрузка сохранённого дампа карты с SD для записи/эмуляции.</p>
+        <div class="prac"><b>Практика</b>Восстановить свой <span class="dev">домофонный ключ</span> из ранее сохранённого .nfc файла.</div>
+      </div>
+      <div class="app"><div class="app-name off"><span class="dot"></span>Erase data <span class="badge off">запись</span></div>
+        <p>Стирание/сброс перезаписываемой метки.</p>
+        <div class="prac"><b>Практика</b>Очистка <span class="dev">«магических» карт UID-changeable</span> перед записью нового дампа.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>SRIX Tool</div>
+        <p>Работа с чипами SRIX/SRI (только с PN532 в I2C).</p>
+        <div class="prac"><b>Практика</b>Метки <span class="dev">SRI512 / SRIX4K</span> — билеты и метки на складах/в музеях.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Emulate / Write NDEF</div>
+        <p>Эмуляция и запись NDEF-сообщений на метку.</p>
+        <div class="prac"><b>Практика</b>Записать <span class="dev">ссылку, Wi-Fi или визитку</span> на чистый стикер <span class="dev">NTAG213/215</span>.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Amiibolink</div>
+        <p>Эмуляция игровых NFC-фигурок.</p>
+        <div class="prac"><b>Практика</b>Подмена <span class="dev">Amiibo для Nintendo Switch</span> (Zelda, Smash) без покупки самих фигурок.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Chameleon</div>
+        <p>Управление устройствами-эмуляторами карт через Bruce.</p>
+        <div class="prac"><b>Практика</b>Хранение и переключение нескольких <span class="dev">Mifare-карт в ChameleonUltra</span> как одной «универсальной» картой.</div>
+      </div>
+      <div class="app"><div class="app-name hw"><span class="dot"></span>PN532 BLE / UART</div>
+        <p>Подключение внешнего NFC-модуля PN532 по BLE или UART.</p>
+        <div class="prac"><b>Практика</b>Использование <span class="dev">PN532Killer</span> для эмуляции и атак на карты через беспроводную связь.</div>
+      </div>
+      <div class="app"><div class="app-name hw"><span class="dot"></span>Config</div>
+        <p>Выбор RFID-модуля и добавление ключей Mifare.</p>
+        <div class="prac"><b>Практика</b>Добавить известные <span class="dev">ключи Mifare (A0A1.., FFFF..)</span> для чтения защищённых секторов.</div>
+        <div class="cmds"><div class="cmds-label">Команды</div>
+          <div class="cmd"><span class="cn">RFID Module</span><span class="cd">выбор модуля: <span class="dev">PN532, RC522, ST25R3916, M5 RFID2</span></span></div>
+          <div class="cmd"><span class="cn">Add MIF Key</span><span class="cd">добавить ключ Mifare в словарь для брутфорса секторов</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- IR -->
+  <section class="cat" id="ir">
+    <div class="cat-head"><span class="cat-num">03</span><h2>IR</h2><span class="cat-tag">Инфракрасный · 38 кГц</span></div>
+    <div class="grid">
+      <div class="app"><div class="app-name"><span class="dot"></span>TV-B-Gone</div>
+        <p>Массово выключает телевизоры перебором кодов выключения.</p>
+        <div class="prac"><b>Практика</b>Погасить <span class="dev">ТВ в кафе, аэропорту, спортзале</span> — работает с большинством брендов (Samsung, LG, Sony).</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Custom IR</div>
+        <p>Отправка своих ИК-кодов из библиотеки/файла.</p>
+        <div class="prac"><b>Практика</b>Универсальный пульт для <span class="dev">кондиционера, проектора, ТВ-приставки</span> из сохранённых кодов.</div>
+        <div class="cmds"><div class="cmds-label">Команды</div>
+          <div class="cmd"><span class="cn">SD Card / LittleFS</span><span class="cd">выбор источника .ir файлов</span></div>
+          <div class="cmd"><span class="cn">Recent</span><span class="cd">недавно использованные коды</span></div>
+          <div class="cmd"><span class="cn">Choose cmd</span><span class="cd">отправить одну выбранную команду из файла</span></div>
+          <div class="cmd"><span class="cn">Spam all</span><span class="cd">послать подряд все команды из файла</span></div>
+        </div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>IR Read</div>
+        <p>Приём и запись ИК-сигнала с любого пульта.</p>
+        <div class="prac"><b>Практика</b>Клонировать <span class="dev">пульт от кондиционера или ТВ</span>, чтобы не искать оригинал.</div>
+      </div>
+      <div class="app"><div class="app-name off"><span class="dot"></span>IR Jammer <span class="badge off">атака</span></div>
+        <p>Глушилка ИК-диапазона.</p>
+        <div class="prac"><b>Практика</b>Проверка, как <span class="dev">пульты и ИК-датчики</span> ведут себя при засветке (тест помехозащищённости).</div>
+      </div>
+      <div class="app"><div class="app-name hw"><span class="dot"></span>Config</div>
+        <p>Настройка пинов TX/RX и числа повторов сигнала.</p>
+        <div class="prac"><b>Практика</b>Увеличить повторы для <span class="dev">капризных приёмников</span>, ловящих сигнал не с первого раза.</div>
+        <div class="cmds"><div class="cmds-label">Команды</div>
+          <div class="cmd"><span class="cn">Ir TX Pin</span><span class="cd">пин ИК-светодиода</span></div>
+          <div class="cmd"><span class="cn">Ir RX Pin</span><span class="cd">пин ИК-приёмника</span></div>
+          <div class="cmd"><span class="cn">Ir TX Repeats</span><span class="cd">сколько раз повторять посылку</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FM -->
+  <section class="cat" id="fm">
+    <div class="cat-head"><span class="cat-num">04</span><h2>FM</h2><span class="cat-tag">Передатчик SI4713</span></div>
+    <div class="grid">
+      <div class="app"><div class="app-name"><span class="dot"></span>Brdcast std / rsvd</div>
+        <p>FM-вещание своего звука на стандартных или зарезервированных частотах.</p>
+        <div class="prac"><b>Практика</b>Передать музыку с телефона на <span class="dev">автомагнитолу или FM-приёмник</span> на свободной частоте (напр. 88.0 МГц).</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Brdcast stop</div>
+        <p>Остановка вещания.</p>
+        <div class="prac"><b>Практика</b>Освободить частоту после <span class="dev">трансляции</span>.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>FM Spectrum</div>
+        <p>Сканирование FM-диапазона и просмотр станций.</p>
+        <div class="prac"><b>Практика</b>Найти <span class="dev">пустую частоту</span> перед началом своего вещания.</div>
+      </div>
+      <div class="app"><div class="app-name off"><span class="dot"></span>Hijack TA <span class="badge off">RDS</span></div>
+        <p>Включение флага дорожных сообщений (TA) в RDS.</p>
+        <div class="prac"><b>Практика</b>Заставить <span class="dev">автомагнитолы с RDS-TA</span> переключиться на вашу трансляцию как «дорожную сводку».</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LoRa -->
+  <section class="cat" id="lora">
+    <div class="cat-head"><span class="cat-num">05</span><h2>LoRa</h2><span class="cat-tag">Дальняя связь · 433/868/915 МГц</span></div>
+    <div class="grid">
+      <div class="app"><div class="app-name sig"><span class="dot"></span>Chat</div>
+        <p>Текстовый чат между устройствами на дальние расстояния.</p>
+        <div class="prac"><b>Практика</b>Связь без сотовой сети — <span class="dev">поход, объект, зоны без покрытия</span>, до нескольких км в прямой видимости.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Change username</div>
+        <p>Смена своего имени в чате.</p>
+        <div class="prac"><b>Практика</b>Отличать <span class="dev">участников группы</span> в общем эфире.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Change Frequency</div>
+        <p>Выбор рабочей частоты LoRa.</p>
+        <div class="prac"><b>Практика</b>Согласовать частоту с <span class="dev">частотным планом региона</span> (868 МГц EU / 915 МГц US).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WiFi -->
+  <section class="cat" id="wifi">
+    <div class="cat-head"><span class="cat-num">06</span><h2>WiFi</h2><span class="cat-tag">2.4 ГГц · ESP32</span></div>
+    <div class="grid">
+      <div class="app"><div class="app-name"><span class="dot"></span>Connect / Start AP</div>
+        <p>Подключение к сети или запуск своей точки доступа.</p>
+        <div class="prac"><b>Практика</b>Раздать <span class="dev">Wi-Fi для WebUI</span> или подключиться к сети для сетевых инструментов.</div>
+      </div>
+      <div class="app"><div class="app-name off"><span class="dot"></span>Wifi Atks <span class="badge off">атака</span></div>
+        <p>Набор атак на Wi-Fi. Внутри — отдельные инструменты:</p>
+        <div class="cmds"><div class="cmds-label">Команды</div>
+          <div class="cmd att"><span class="cn">Target Atks</span><span class="cd">сканирует сети и открывает атаки на выбранную точку: <span class="dev">Information, Deauth, Capture Handshake, Clone Portal, Deauth+Clone, Deauth+Clone+Verify</span></span></div>
+          <div class="cmd att"><span class="cn">Karma Attack</span><span class="cd">отвечает на probe-запросы устройств, притворяясь их «любимой» сетью</span></div>
+          <div class="cmd att"><span class="cn">Beacon SPAM</span><span class="cd">заливает эфир фейковыми SSID: <span class="dev">Funny SSID, Ricky Roll, Random, Single, Custom SSIDs</span></span></div>
+          <div class="cmd att"><span class="cn">Deauth Flood</span><span class="cd">массовый deauth всех сетей вокруг</span></div>
+          <div class="cmd att"><span class="cn">Enhanced Deauth</span><span class="cd">точечный deauth: <span class="dev">Station Deauth (один клиент), Deauth All Clients, Deauth Target List</span></span></div>
+        </div>
+      </div>
+      <div class="app"><div class="app-name off"><span class="dot"></span>Evil Portal <span class="badge off">фишинг</span></div>
+        <p>Фейковый портал-captive для перехвата логинов/паролей.</p>
+        <div class="prac"><b>Практика</b>Клон страницы <span class="dev">«Гостевой Wi-Fi отеля/кафе»</span> — демонстрация, как крадут учётки в открытых сетях.</div>
+      </div>
+      <div class="app"><div class="app-name off"><span class="dot"></span>NetCut <span class="badge off">атака</span></div>
+        <p>Отключение устройств в сети через ARP-спуфинг.</p>
+        <div class="prac"><b>Практика</b>Отрезать <span class="dev">устройство от локальной сети</span> в рамках теста сегментации.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Sniffer</div>
+        <p>Перехват и анализ Wi-Fi пакетов.</p>
+        <div class="prac"><b>Практика</b>Сбор <span class="dev">handshake для аудита пароля</span> своей точки доступа.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Channel Analyzer</div>
+        <p>Анализ загруженности Wi-Fi каналов.</p>
+        <div class="prac"><b>Практика</b>Выбрать <span class="dev">свободный канал для роутера</span>, чтобы убрать тормоза.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Jam Detect</div>
+        <p>Обнаружение глушилок/помех в эфире.</p>
+        <div class="prac"><b>Практика</b>Понять, <span class="dev">глушат ли эфир</span> рядом (диагностика проблем связи).</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Scan Hosts</div>
+        <p>ARP-сканирование хостов в локальной сети.</p>
+        <div class="prac"><b>Практика</b>Инвентаризация <span class="dev">IP-камер, IoT, ПК</span> в домашней сети.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>TCP / SSH / Telnet / Wireguard</div>
+        <p>Сетевые клиенты: TCP-сервер/клиент, SOCKS4, Telnet/SSH, VPN.</p>
+        <div class="prac"><b>Практика</b>Зайти по <span class="dev">SSH на сервер</span> или поднять VPN-туннель прямо с устройства.</div>
+      </div>
+      <div class="app"><div class="app-name off"><span class="dot"></span>Responder <span class="badge off">атака</span></div>
+        <p>Перехват учёток через LLMNR/NBT-NS poisoning.</p>
+        <div class="prac"><b>Практика</b>Сбор <span class="dev">NetNTLM-хешей Windows</span> при пентесте корпоративной сети.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Brucegotchi</div>
+        <p>«Тамагочи», питающийся пойманными Wi-Fi пакетами.</p>
+        <div class="prac"><b>Практика</b>Игровой аналог <span class="dev">Pwnagotchi</span> — растёт от активности эфира вокруг.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>WiFi Pass Recovery</div>
+        <p>Восстановление сохранённых паролей Wi-Fi.</p>
+        <div class="prac"><b>Практика</b>Вспомнить <span class="dev">пароль своей сети</span>, сохранённый на устройстве.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BLE -->
+  <section class="cat" id="ble">
+    <div class="cat-head"><span class="cat-num">07</span><h2>BLE</h2><span class="cat-tag">Bluetooth Low Energy</span></div>
+    <div class="grid">
+      <div class="app"><div class="app-name"><span class="dot"></span>Media Cmds</div>
+        <p>Управление медиаплеером телефона по BLE.</p>
+        <div class="prac"><b>Практика</b>Play/pause и громкость на <span class="dev">телефоне или колонке</span> как пультом.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>BLE Scan</div>
+        <p>Сканирование Bluetooth-устройств рядом.</p>
+        <div class="prac"><b>Практика</b>Найти рядом <span class="dev">AirTag, наушники, фитнес-браслеты</span> и их MAC-адреса.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>iBeacon</div>
+        <p>Эмуляция маячка Apple iBeacon.</p>
+        <div class="prac"><b>Практика</b>Тест <span class="dev">приложений, реагирующих на beacon</span> (музеи, магазины, навигация в помещении).</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Bad BLE / BLE Keyboard</div>
+        <p>Эмуляция BLE-клавиатуры для авто-ввода (Ducky-скрипты).</p>
+        <div class="prac"><b>Практика</b>Беспроводной <span class="dev">BadUSB на телефоне/ПК с Bluetooth</span> — ввод команд без провода.</div>
+      </div>
+      <div class="app"><div class="app-name off"><span class="dot"></span>BLE Spam <span class="badge off">атака</span></div>
+        <p>Спам всплывающими окнами сопряжения. Выбор цели по платформе:</p>
+        <div class="cmds"><div class="cmds-label">Команды</div>
+          <div class="cmd att"><span class="cn">Apple Pairing Prompt</span><span class="cd">окно сопряжения <span class="dev">AirPods / Beats</span> на iPhone</span></div>
+          <div class="cmd att"><span class="cn">Apple Action Modal</span><span class="cd">модалки <span class="dev">Apple TV Setup, HomePod, Vision Pro</span></span></div>
+          <div class="cmd att"><span class="cn">Apple Not Your Device</span><span class="cd">уведомление «это не ваше устройство»</span></div>
+          <div class="cmd att"><span class="cn">Android Device Alert</span><span class="cd">Fast Pair попапы (<span class="dev">Pixel Buds и др.</span>)</span></div>
+          <div class="cmd att"><span class="cn">Windows Swift Pair</span><span class="cd">уведомления сопряжения Windows</span></div>
+          <div class="cmd att"><span class="cn">Samsung BLE Spam</span><span class="cd">попапы Galaxy Buds / Watch</span></div>
+        </div>
+      </div>
+      <div class="app"><div class="app-name off"><span class="dot"></span>BLE Suite <span class="badge off">атака</span></div>
+        <p>Полный набор для анализа и атак BLE (v3.1):</p>
+        <div class="cmds"><div class="cmds-label">Команды</div>
+          <div class="cmd"><span class="cn">Quick Vulnerability Scan</span><span class="cd">быстрый поиск уязвимостей устройства</span></div>
+          <div class="cmd"><span class="cn">Deep Device Profiling</span><span class="cd">глубокий разбор GATT-сервисов и характеристик</span></div>
+          <div class="cmd att"><span class="cn">FastPair Attack Suite</span><span class="cd">атаки на Google Fast Pair</span></div>
+          <div class="cmd att"><span class="cn">HFP (Hands-Free) Suite</span><span class="cd">эксплойты профиля гарнитуры</span></div>
+          <div class="cmd att"><span class="cn">Audio / HID Attack Suite</span><span class="cd">атаки на аудио и эмуляцию клавиатуры/мыши</span></div>
+          <div class="cmd att"><span class="cn">Memory Corruption Suite</span><span class="cd">попытки повреждения памяти стека BLE</span></div>
+          <div class="cmd att"><span class="cn">DoS Attacks</span><span class="cd">Connection Flood и Advertising Spam</span></div>
+          <div class="cmd att"><span class="cn">Payload Delivery</span><span class="cd">DuckyScript-инъекция, PIN-брутфорс, обход авторизации</span></div>
+          <div class="cmd"><span class="cn">Testing Tools / Universal Chain</span><span class="cd">тест-утилиты и авто-цепочка атак</span></div>
+          <div class="cmd"><span class="cn">BLE Sniffer</span><span class="cd">перехват BLE-трафика</span></div>
+        </div>
+      </div>
+      <div class="app"><div class="app-name off"><span class="dot"></span>Ninebot <span class="badge off">BLE</span></div>
+        <p>Взаимодействие с самокатами по BLE.</p>
+        <div class="prac"><b>Практика</b>Команды <span class="dev">самокатам Ninebot / Xiaomi</span> (сигнал, блокировка) — тест защищённости.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Presenter mode</div>
+        <p>Режим пульта-презентера для слайдов.</p>
+        <div class="prac"><b>Практика</b>Листать <span class="dev">PowerPoint / Google Slides</span> с устройства в руке.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>BLE Sniffer</div>
+        <p>Перехват BLE-трафика (Lite-версия).</p>
+        <div class="prac"><b>Практика</b>Наблюдать <span class="dev">обмен браслета с телефоном</span> для реверса протокола.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NRF24 -->
+  <section class="cat" id="nrf">
+    <div class="cat-head"><span class="cat-num">08</span><h2>NRF24</h2><span class="cat-tag">Внешний модуль · 2.4 ГГц</span></div>
+    <div class="grid">
+      <div class="app"><div class="app-name hw"><span class="dot"></span>Information</div>
+        <p>Информация о подключённом модуле NRF24.</p>
+        <div class="prac"><b>Практика</b>Проверить, что <span class="dev">модуль nRF24L01+</span> распознан и подключён правильно.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Spectrum</div>
+        <p>Анализатор спектра 2.4 ГГц.</p>
+        <div class="prac"><b>Практика</b>Увидеть загруженность <span class="dev">Wi-Fi/BLE каналов</span> и найти свободные.</div>
+      </div>
+      <div class="app"><div class="app-name off"><span class="dot"></span>MouseJack <span class="badge off">атака</span></div>
+        <p>Атака на беспроводные мыши/клавиатуры (инъекция нажатий).</p>
+        <div class="prac"><b>Практика</b>Инъекция клавиш в <span class="dev">Logitech Unifying, Microsoft-донглы</span> — классическая уязвимость MouseJack.</div>
+      </div>
+      <div class="app"><div class="app-name off"><span class="dot"></span>NRF Jammer <span class="badge off">атака</span></div>
+        <p>Глушилка диапазона 2.4 ГГц.</p>
+        <div class="prac"><b>Практика</b>Тест устойчивости <span class="dev">Wi-Fi/BLE устройств</span> к помехам (в экранированной среде).</div>
+      </div>
+      <div class="app"><div class="app-name hw"><span class="dot"></span>Config pins</div>
+        <p>Выбор схемы подключения модуля nRF24.</p>
+        <div class="cmds"><div class="cmds-label">Команды</div>
+          <div class="cmd"><span class="cn">NRF24 (legacy)</span><span class="cd">отдельные пины под модуль</span></div>
+          <div class="cmd"><span class="cn">NRF24 (shared SPI)</span><span class="cd">общая SPI-шина с SD-картой</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ethernet -->
+  <section class="cat" id="eth">
+    <div class="cat-head"><span class="cat-num">09</span><h2>Ethernet</h2><span class="cat-tag">Модуль W5500 · проводная сеть</span></div>
+    <div class="grid">
+      <div class="app"><div class="app-name"><span class="dot"></span>Scan Hosts</div>
+        <p>ARP-сканирование устройств в проводной сети.</p>
+        <div class="prac"><b>Практика</b>Карта <span class="dev">хостов офисного LAN</span> при подключении к розетке.</div>
+      </div>
+      <div class="app"><div class="app-name off"><span class="dot"></span>DHCP Starvation <span class="badge off">атака</span></div>
+        <p>Истощение пула DHCP — занимает все адреса.</p>
+        <div class="prac"><b>Практика</b>Тест, как <span class="dev">DHCP-сервер</span> реагирует на исчерпание адресов (отказ выдачи новым).</div>
+      </div>
+      <div class="app"><div class="app-name off"><span class="dot"></span>MAC Flooding <span class="badge off">атака</span></div>
+        <p>Переполнение таблицы MAC коммутатора.</p>
+        <div class="prac"><b>Практика</b>Проверка, уходит ли <span class="dev">дешёвый свитч</span> в режим хаба (утечка трафика на все порты).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GPS -->
+  <section class="cat" id="gps">
+    <div class="cat-head"><span class="cat-num">10</span><h2>GPS</h2><span class="cat-tag">Внешний UART-модуль</span></div>
+    <div class="grid">
+      <div class="app"><div class="app-name"><span class="dot"></span>Wardriving</div>
+        <p>Сбор Wi-Fi/BLE точек с привязкой к координатам.</p>
+        <div class="prac"><b>Практика</b>Составление <span class="dev">карты точек доступа</span> района, экспорт в формат Wigle.</div>
+        <div class="cmds"><div class="cmds-label">Команды</div>
+          <div class="cmd"><span class="cn">Scan WiFi Networks</span><span class="cd">только Wi-Fi точки</span></div>
+          <div class="cmd"><span class="cn">Scan BLE Devices</span><span class="cd">только Bluetooth-устройства</span></div>
+          <div class="cmd"><span class="cn">Scan Both</span><span class="cd">Wi-Fi и BLE одновременно</span></div>
+        </div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>GPS Tracker</div>
+        <p>Запись трека перемещения.</p>
+        <div class="prac"><b>Практика</b>Логирование <span class="dev">маршрута прогулки/поездки</span> в файл на SD.</div>
+      </div>
+      <div class="app"><div class="app-name hw"><span class="dot"></span>Config</div>
+        <p>Скорость (baudrate) и пины GPS-модуля.</p>
+        <div class="prac"><b>Практика</b>Подстроить под конкретный <span class="dev">модуль (NEO-6M, ATGM336H)</span>.</div>
+        <div class="cmds"><div class="cmds-label">Команды</div>
+          <div class="cmd"><span class="cn">Baudrate</span><span class="cd">скорость обмена с модулем (9600/38400…)</span></div>
+          <div class="cmd"><span class="cn">GPS Pins</span><span class="cd">назначение UART-пинов RX/TX</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Others -->
+  <section class="cat" id="others">
+    <div class="cat-head"><span class="cat-num">11</span><h2>Others</h2><span class="cat-tag">USB · iButton · разное</span></div>
+    <div class="grid">
+      <div class="app"><div class="app-name"><span class="dot"></span>QRCodes</div>
+        <p>Вывод QR-кодов на экран.</p>
+        <div class="prac"><b>Практика</b>Быстро показать <span class="dev">ссылку, Wi-Fi пароль или крипто-адрес</span> для сканирования телефоном.</div>
+      </div>
+      <div class="app"><div class="app-name off"><span class="dot"></span>Megalodon <span class="badge off">атака</span></div>
+        <p>Deauth-инструмент («shark»).</p>
+        <div class="prac"><b>Практика</b>Массовое <span class="dev">отключение клиентов Wi-Fi</span> для стресс-теста своей сети.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Microphone</div>
+        <p>Работа со встроенным микрофоном.</p>
+        <div class="cmds"><div class="cmds-label">Команды</div>
+          <div class="cmd"><span class="cn">Spectrum</span><span class="cd">спектр звука в реальном времени</span></div>
+          <div class="cmd"><span class="cn">Record</span><span class="cd">запись аудио в файл на SD</span></div>
+        </div>
+      </div>
+      <div class="app"><div class="app-name off"><span class="dot"></span>BadUSB &amp; HID <span class="badge off">атака</span></div>
+        <p>Эмуляция USB-устройств ввода. Внутри:</p>
+        <div class="cmds"><div class="cmds-label">Команды</div>
+          <div class="cmd att"><span class="cn">BadUSB</span><span class="cd">выполнение DuckyScript при подключении к <span class="dev">Windows/macOS/Linux</span></span></div>
+          <div class="cmd"><span class="cn">USB Keyboard</span><span class="cd">устройство как обычная USB-клавиатура для ручного ввода</span></div>
+          <div class="cmd"><span class="cn">USB Clicker</span><span class="cd">эмуляция кликера/презентера</span></div>
+          <div class="cmd"><span class="cn">USB U2F</span><span class="cd">аппаратный ключ двухфакторной аутентификации</span></div>
+        </div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>iButton</div>
+        <p>Чтение/эмуляция ключей-таблеток Dallas.</p>
+        <div class="prac"><b>Практика</b>Ключи домофонов <span class="dev">DS1990 (Cyfral, Metakom, Vizit)</span> — те самые круглые «таблетки».</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Files -->
+  <section class="cat" id="files">
+    <div class="cat-head"><span class="cat-num">12</span><h2>Files</h2><span class="cat-tag">Файловый менеджер</span></div>
+    <div class="grid">
+      <div class="app"><div class="app-name"><span class="dot"></span>SD Card / LittleFS</div>
+        <p>Файловый менеджер по SD-карте и внутренней памяти.</p>
+        <div class="prac"><b>Практика</b>Просмотр и удаление <span class="dev">сохранённых дампов карт, RF-сигналов, скриптов</span>.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>WebUI</div>
+        <p>Управление файлами через браузер по Wi-Fi.</p>
+        <div class="prac"><b>Практика</b>Залить <span class="dev">.js скрипты и .ir/.sub файлы</span> с ноутбука без вынимания карты.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Connect</div>
+        <p>Передача файлов и команд между устройствами Bruce.</p>
+        <div class="prac"><b>Практика</b>Обмен <span class="dev">коллекцией сигналов</span> с другим владельцем Bruce.</div>
+        <div class="cmds"><div class="cmds-label">Команды</div>
+          <div class="cmd"><span class="cn">Send File / Recv File</span><span class="cd">отправить или принять файл</span></div>
+          <div class="cmd"><span class="cn">Send Cmds / Recv Cmds</span><span class="cd">обмен командами по serial-каналу</span></div>
+        </div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Mass Storage</div>
+        <p>Режим USB-флешки — доступ к SD с компьютера.</p>
+        <div class="prac"><b>Практика</b>Смонтировать SD как <span class="dev">обычную флешку</span> для копирования файлов.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Connect -->
+  <section class="cat" id="connect">
+    <div class="cat-head"><span class="cat-num">13</span><h2>Connect</h2><span class="cat-tag">Связь устройств</span></div>
+    <div class="grid">
+      <div class="app"><div class="app-name"><span class="dot"></span>Send / Recv File</div>
+        <p>Отправка и приём файлов между устройствами Bruce.</p>
+        <div class="prac"><b>Практика</b>Передать <span class="dev">прошивочные скрипты и дампы</span> напарнику по ESP-NOW.</div>
+      </div>
+      <div class="app"><div class="app-name"><span class="dot"></span>Send / Recv Cmds</div>
+        <p>Обмен командами по последовательному каналу.</p>
+        <div class="prac"><b>Практика</b>Управлять <span class="dev">вторым устройством</span> удалённо как ведомым.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scripts -->
+  <section class="cat" id="scripts">
+    <div class="cat-head"><span class="cat-num">14</span><h2>Scripts</h2><span class="cat-tag">JS-интерпретатор</span></div>
+    <div class="grid">
+      <div class="app"><div class="app-name"><span class="dot"></span>Load...</div>
+        <p>Запуск пользовательских .js-скриптов (BruceScript) с SD.</p>
+        <div class="prac"><b>Практика</b>Автоматизация: <span class="dev">свой сценарий работы с RF/NFC/GPIO</span> — например «прочитать метку и мигнуть LED».</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Clock -->
+  <section class="cat" id="clock">
+    <div class="cat-head"><span class="cat-num">15</span><h2>Clock</h2><span class="cat-tag">Часы · таймер</span></div>
+    <div class="grid">
+      <div class="app"><div class="app-name"><span class="dot"></span>Timer / Watch</div>
+        <p>Таймер и секундомер; основной экран показывает часы.</p>
+        <div class="prac"><b>Практика</b>Использовать устройство как <span class="dev">наручные часы</span> (на M5StickC) в перерыве между задачами.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Config -->
+  <section class="cat" id="config">
+    <div class="cat-head"><span class="cat-num">16</span><h2>Config</h2><span class="cat-tag">Настройки системы</span></div>
+    <div class="grid">
+      <div class="app"><div class="app-name hw"><span class="dot"></span>Display &amp; UI</div>
+        <p>Яркость, ориентация, тема интерфейса.</p>
+        <div class="prac"><b>Практика</b>Повернуть экран и снизить яркость для <span class="dev">экономии батареи</span>.</div>
+      </div>
+      <div class="app"><div class="app-name hw"><span class="dot"></span>LED / Audio Config</div>
+        <p>Настройка RGB-подсветки и звука/зуммера.</p>
+        <div class="prac"><b>Практика</b>Отключить писк зуммера для <span class="dev">тихой работы</span>.</div>
+      </div>
+      <div class="app"><div class="app-name hw"><span class="dot"></span>System Config</div>
+        <p>Язык, имя устройства, системные параметры.</p>
+        <div class="prac"><b>Практика</b>Задать <span class="dev">своё имя устройства</span> для чата и Connect.</div>
+      </div>
+      <div class="app"><div class="app-name hw"><span class="dot"></span>Power</div>
+        <p>Режимы энергосбережения и выключение.</p>
+        <div class="prac"><b>Практика</b>Включить <span class="dev">сон/автояркость</span> для долгой автономности.</div>
+      </div>
+      <div class="app"><div class="app-name hw"><span class="dot"></span>App Store / Dev Mode / About</div>
+        <p>Магазин приложений, режим разработчика, инфо об устройстве.</p>
+        <div class="prac"><b>Практика</b>Установить <span class="dev">доп. приложения</span> или посмотреть версию прошивки и модель чипа.</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    Источник меню: репозиторий BruceDevices/firmware · Пункты меню зависят от модели устройства и версии (LITE/full) · <a href="https://github.com/BruceDevices/firmware">github.com/BruceDevices/firmware</a>
+  </div>
+</footer>
+
+</body>
+</html>
