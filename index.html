@@ -210,6 +210,22 @@
   .cmd .cd { font-size: .78rem; color: var(--ink-soft); }
   .cmd .cd .dev { color: var(--ink); font-weight: 600; }
 
+  .subtree { margin-left: 16px; display: flex; flex-direction: column; }
+  .subtree .cn { font-size: .76rem; }
+
+  details.cmds > summary, details.subd > summary { cursor: pointer; }
+  details.cmds > summary { list-style: none; width: fit-content; user-select: none;
+    display: inline-flex; align-items: center; gap: 6px; padding: 2px 0; }
+  details.cmds > summary::-webkit-details-marker { display: none; }
+  details.cmds > summary::before { content: "▸"; color: var(--accent); font-size: .7rem; }
+  details.cmds[open] > summary::before { content: "▾"; }
+  details.subd { display: block; margin: 2px 0; }
+  details.subd > summary { list-style: none; user-select: none; }
+  details.subd > summary::-webkit-details-marker { display: none; }
+  details.subd > summary .cn::before { content: "▸ "; color: var(--offense); }
+  details.subd[open] > summary .cn::before { content: "▾ "; }
+  summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
   footer {
     border-top: 1px solid var(--line);
     padding: 28px 0 60px; color: var(--ink-faint);
@@ -300,12 +316,12 @@
       <div class="app"><div class="app-name hw"><span class="dot"></span>Config</div>
         <p>Настройка пинов TX/RX, выбор модуля CC1101 и рабочей частоты.</p>
         <div class="prac"><b>Практика</b>Переключение между <span class="dev">встроенным передатчиком и внешним CC1101</span> для большей дальности.</div>
-        <div class="cmds"><div class="cmds-label">Команды</div>
+        <details class="cmds"><summary class="cmds-label">Команды</summary>
           <div class="cmd"><span class="cn">RF TX Pin</span><span class="cd">пин передатчика</span></div>
           <div class="cmd"><span class="cn">RF RX Pin</span><span class="cd">пин приёмника</span></div>
           <div class="cmd"><span class="cn">RF Module</span><span class="cd">встроенный или <span class="dev">CC1101</span></span></div>
           <div class="cmd"><span class="cn">RF Frequency</span><span class="cd">частота по умолчанию (433/315/868)</span></div>
-        </div>
+        </details>
       </div>
     </div>
   </section>
@@ -361,10 +377,10 @@
       <div class="app"><div class="app-name hw"><span class="dot"></span>Config</div>
         <p>Выбор RFID-модуля и добавление ключей Mifare.</p>
         <div class="prac"><b>Практика</b>Добавить известные <span class="dev">ключи Mifare (A0A1.., FFFF..)</span> для чтения защищённых секторов.</div>
-        <div class="cmds"><div class="cmds-label">Команды</div>
+        <details class="cmds"><summary class="cmds-label">Команды</summary>
           <div class="cmd"><span class="cn">RFID Module</span><span class="cd">выбор модуля: <span class="dev">PN532, RC522, ST25R3916, M5 RFID2</span></span></div>
           <div class="cmd"><span class="cn">Add MIF Key</span><span class="cd">добавить ключ Mifare в словарь для брутфорса секторов</span></div>
-        </div>
+        </details>
       </div>
     </div>
   </section>
@@ -380,12 +396,12 @@
       <div class="app"><div class="app-name"><span class="dot"></span>Custom IR</div>
         <p>Отправка своих ИК-кодов из библиотеки/файла.</p>
         <div class="prac"><b>Практика</b>Универсальный пульт для <span class="dev">кондиционера, проектора, ТВ-приставки</span> из сохранённых кодов.</div>
-        <div class="cmds"><div class="cmds-label">Команды</div>
+        <details class="cmds"><summary class="cmds-label">Команды</summary>
           <div class="cmd"><span class="cn">SD Card / LittleFS</span><span class="cd">выбор источника .ir файлов</span></div>
           <div class="cmd"><span class="cn">Recent</span><span class="cd">недавно использованные коды</span></div>
           <div class="cmd"><span class="cn">Choose cmd</span><span class="cd">отправить одну выбранную команду из файла</span></div>
           <div class="cmd"><span class="cn">Spam all</span><span class="cd">послать подряд все команды из файла</span></div>
-        </div>
+        </details>
       </div>
       <div class="app"><div class="app-name"><span class="dot"></span>IR Read</div>
         <p>Приём и запись ИК-сигнала с любого пульта.</p>
@@ -398,11 +414,11 @@
       <div class="app"><div class="app-name hw"><span class="dot"></span>Config</div>
         <p>Настройка пинов TX/RX и числа повторов сигнала.</p>
         <div class="prac"><b>Практика</b>Увеличить повторы для <span class="dev">капризных приёмников</span>, ловящих сигнал не с первого раза.</div>
-        <div class="cmds"><div class="cmds-label">Команды</div>
+        <details class="cmds"><summary class="cmds-label">Команды</summary>
           <div class="cmd"><span class="cn">Ir TX Pin</span><span class="cd">пин ИК-светодиода</span></div>
           <div class="cmd"><span class="cn">Ir RX Pin</span><span class="cd">пин ИК-приёмника</span></div>
           <div class="cmd"><span class="cn">Ir TX Repeats</span><span class="cd">сколько раз повторять посылку</span></div>
-        </div>
+        </details>
       </div>
     </div>
   </section>
@@ -459,13 +475,21 @@
       </div>
       <div class="app"><div class="app-name off"><span class="dot"></span>Wifi Atks <span class="badge off">атака</span></div>
         <p>Набор атак на Wi-Fi. Внутри — отдельные инструменты:</p>
-        <div class="cmds"><div class="cmds-label">Команды</div>
-          <div class="cmd att"><span class="cn">Target Atks</span><span class="cd">сканирует сети и открывает атаки на выбранную точку: <span class="dev">Information, Deauth, Capture Handshake, Clone Portal, Deauth+Clone, Deauth+Clone+Verify</span></span></div>
+        <details class="cmds"><summary class="cmds-label">Команды</summary>
+          <details class="subd"><summary class="cmd att"><span class="cn">Target Atks</span><span class="cd">сканирует эфир, даёшь выбрать точку — открывается меню атак по ней (нажми, чтобы раскрыть):</span></summary>
+          <div class="subtree">
+            <div class="cmd"><span class="cn">Information</span><span class="cd">Паспорт точки: <span class="dev">SSID, номер канала, BSSID (MAC)</span>. Ничего не передаёт — это разведка перед атакой, чтобы записать цель и убедиться, что выбрана нужная сеть.</span></div>
+            <div class="cmd att"><span class="cn">Deauth</span><span class="cd">Шлёт кадры деаутентификации на BSSID точки и выбивает её клиентов из сети. Пока атака идёт — устройства не могут пользоваться Wi-Fi; остановишь — переподключаются. Работает на <span class="dev">WPA2 и ниже</span> (не на защищённых 802.11w).</span></div>
+            <div class="cmd att"><span class="cn">Capture Handshake</span><span class="cd">Деаутит клиента и ловит его повторное подключение, перехватывая <span class="dev">WPA 4-way handshake (EAPOL msg 1–4)</span>. Сохраняет <span class="dev">.pcap в /BrucePCAP/handshakes/</span> на SD — файл потом гонят в hashcat/aircrack для оффлайн-подбора пароля. Показывает тип шифрования; <span class="dev">WPA3 (SAE)</span> так не вскрывается.</span></div>
+            <div class="cmd att"><span class="cn">Clone Portal</span><span class="cd">Поднимает фейковую точку с тем же <span class="dev">SSID</span> и captive-портал (страницу входа). Кто подключится и введёт пароль — данные уходят тебе. Без деаута: расчёт на тех, кто подключится сам.</span></div>
+            <div class="cmd att"><span class="cn">Deauth+Clone</span><span class="cd">То же, что Clone Portal, но одновременно деаутит настоящую точку. Клиенты теряют оригинал и цепляются к твоему клону (<span class="dev">«злой двойник» / rogue AP</span>), где и вводят пароль.</span></div>
+            <div class="cmd att"><span class="cn">Deauth+Clone+Verify</span><span class="cd">То же плюс <span class="dev">проверка пароля</span>: введённую строку устройство сразу пробует на реальной точке. Так к тебе попадает только верный пароль, а не случайный набор, который вбил пользователь.</span></div>
+          </div></details>
           <div class="cmd att"><span class="cn">Karma Attack</span><span class="cd">отвечает на probe-запросы устройств, притворяясь их «любимой» сетью</span></div>
           <div class="cmd att"><span class="cn">Beacon SPAM</span><span class="cd">заливает эфир фейковыми SSID: <span class="dev">Funny SSID, Ricky Roll, Random, Single, Custom SSIDs</span></span></div>
           <div class="cmd att"><span class="cn">Deauth Flood</span><span class="cd">массовый deauth всех сетей вокруг</span></div>
           <div class="cmd att"><span class="cn">Enhanced Deauth</span><span class="cd">точечный deauth: <span class="dev">Station Deauth (один клиент), Deauth All Clients, Deauth Target List</span></span></div>
-        </div>
+        </details>
       </div>
       <div class="app"><div class="app-name off"><span class="dot"></span>Evil Portal <span class="badge off">фишинг</span></div>
         <p>Фейковый портал-captive для перехвата логинов/паролей.</p>
@@ -532,18 +556,18 @@
       </div>
       <div class="app"><div class="app-name off"><span class="dot"></span>BLE Spam <span class="badge off">атака</span></div>
         <p>Спам всплывающими окнами сопряжения. Выбор цели по платформе:</p>
-        <div class="cmds"><div class="cmds-label">Команды</div>
+        <details class="cmds"><summary class="cmds-label">Команды</summary>
           <div class="cmd att"><span class="cn">Apple Pairing Prompt</span><span class="cd">окно сопряжения <span class="dev">AirPods / Beats</span> на iPhone</span></div>
           <div class="cmd att"><span class="cn">Apple Action Modal</span><span class="cd">модалки <span class="dev">Apple TV Setup, HomePod, Vision Pro</span></span></div>
           <div class="cmd att"><span class="cn">Apple Not Your Device</span><span class="cd">уведомление «это не ваше устройство»</span></div>
           <div class="cmd att"><span class="cn">Android Device Alert</span><span class="cd">Fast Pair попапы (<span class="dev">Pixel Buds и др.</span>)</span></div>
           <div class="cmd att"><span class="cn">Windows Swift Pair</span><span class="cd">уведомления сопряжения Windows</span></div>
           <div class="cmd att"><span class="cn">Samsung BLE Spam</span><span class="cd">попапы Galaxy Buds / Watch</span></div>
-        </div>
+        </details>
       </div>
       <div class="app"><div class="app-name off"><span class="dot"></span>BLE Suite <span class="badge off">атака</span></div>
         <p>Полный набор для анализа и атак BLE (v3.1):</p>
-        <div class="cmds"><div class="cmds-label">Команды</div>
+        <details class="cmds"><summary class="cmds-label">Команды</summary>
           <div class="cmd"><span class="cn">Quick Vulnerability Scan</span><span class="cd">быстрый поиск уязвимостей устройства</span></div>
           <div class="cmd"><span class="cn">Deep Device Profiling</span><span class="cd">глубокий разбор GATT-сервисов и характеристик</span></div>
           <div class="cmd att"><span class="cn">FastPair Attack Suite</span><span class="cd">атаки на Google Fast Pair</span></div>
@@ -554,7 +578,7 @@
           <div class="cmd att"><span class="cn">Payload Delivery</span><span class="cd">DuckyScript-инъекция, PIN-брутфорс, обход авторизации</span></div>
           <div class="cmd"><span class="cn">Testing Tools / Universal Chain</span><span class="cd">тест-утилиты и авто-цепочка атак</span></div>
           <div class="cmd"><span class="cn">BLE Sniffer</span><span class="cd">перехват BLE-трафика</span></div>
-        </div>
+        </details>
       </div>
       <div class="app"><div class="app-name off"><span class="dot"></span>Ninebot <span class="badge off">BLE</span></div>
         <p>Взаимодействие с самокатами по BLE.</p>
@@ -593,10 +617,10 @@
       </div>
       <div class="app"><div class="app-name hw"><span class="dot"></span>Config pins</div>
         <p>Выбор схемы подключения модуля nRF24.</p>
-        <div class="cmds"><div class="cmds-label">Команды</div>
+        <details class="cmds"><summary class="cmds-label">Команды</summary>
           <div class="cmd"><span class="cn">NRF24 (legacy)</span><span class="cd">отдельные пины под модуль</span></div>
           <div class="cmd"><span class="cn">NRF24 (shared SPI)</span><span class="cd">общая SPI-шина с SD-картой</span></div>
-        </div>
+        </details>
       </div>
     </div>
   </section>
@@ -627,11 +651,11 @@
       <div class="app"><div class="app-name"><span class="dot"></span>Wardriving</div>
         <p>Сбор Wi-Fi/BLE точек с привязкой к координатам.</p>
         <div class="prac"><b>Практика</b>Составление <span class="dev">карты точек доступа</span> района, экспорт в формат Wigle.</div>
-        <div class="cmds"><div class="cmds-label">Команды</div>
+        <details class="cmds"><summary class="cmds-label">Команды</summary>
           <div class="cmd"><span class="cn">Scan WiFi Networks</span><span class="cd">только Wi-Fi точки</span></div>
           <div class="cmd"><span class="cn">Scan BLE Devices</span><span class="cd">только Bluetooth-устройства</span></div>
           <div class="cmd"><span class="cn">Scan Both</span><span class="cd">Wi-Fi и BLE одновременно</span></div>
-        </div>
+        </details>
       </div>
       <div class="app"><div class="app-name"><span class="dot"></span>GPS Tracker</div>
         <p>Запись трека перемещения.</p>
@@ -640,10 +664,10 @@
       <div class="app"><div class="app-name hw"><span class="dot"></span>Config</div>
         <p>Скорость (baudrate) и пины GPS-модуля.</p>
         <div class="prac"><b>Практика</b>Подстроить под конкретный <span class="dev">модуль (NEO-6M, ATGM336H)</span>.</div>
-        <div class="cmds"><div class="cmds-label">Команды</div>
+        <details class="cmds"><summary class="cmds-label">Команды</summary>
           <div class="cmd"><span class="cn">Baudrate</span><span class="cd">скорость обмена с модулем (9600/38400…)</span></div>
           <div class="cmd"><span class="cn">GPS Pins</span><span class="cd">назначение UART-пинов RX/TX</span></div>
-        </div>
+        </details>
       </div>
     </div>
   </section>
@@ -662,19 +686,19 @@
       </div>
       <div class="app"><div class="app-name"><span class="dot"></span>Microphone</div>
         <p>Работа со встроенным микрофоном.</p>
-        <div class="cmds"><div class="cmds-label">Команды</div>
+        <details class="cmds"><summary class="cmds-label">Команды</summary>
           <div class="cmd"><span class="cn">Spectrum</span><span class="cd">спектр звука в реальном времени</span></div>
           <div class="cmd"><span class="cn">Record</span><span class="cd">запись аудио в файл на SD</span></div>
-        </div>
+        </details>
       </div>
       <div class="app"><div class="app-name off"><span class="dot"></span>BadUSB &amp; HID <span class="badge off">атака</span></div>
         <p>Эмуляция USB-устройств ввода. Внутри:</p>
-        <div class="cmds"><div class="cmds-label">Команды</div>
+        <details class="cmds"><summary class="cmds-label">Команды</summary>
           <div class="cmd att"><span class="cn">BadUSB</span><span class="cd">выполнение DuckyScript при подключении к <span class="dev">Windows/macOS/Linux</span></span></div>
           <div class="cmd"><span class="cn">USB Keyboard</span><span class="cd">устройство как обычная USB-клавиатура для ручного ввода</span></div>
           <div class="cmd"><span class="cn">USB Clicker</span><span class="cd">эмуляция кликера/презентера</span></div>
           <div class="cmd"><span class="cn">USB U2F</span><span class="cd">аппаратный ключ двухфакторной аутентификации</span></div>
-        </div>
+        </details>
       </div>
       <div class="app"><div class="app-name"><span class="dot"></span>iButton</div>
         <p>Чтение/эмуляция ключей-таблеток Dallas.</p>
@@ -698,10 +722,10 @@
       <div class="app"><div class="app-name"><span class="dot"></span>Connect</div>
         <p>Передача файлов и команд между устройствами Bruce.</p>
         <div class="prac"><b>Практика</b>Обмен <span class="dev">коллекцией сигналов</span> с другим владельцем Bruce.</div>
-        <div class="cmds"><div class="cmds-label">Команды</div>
+        <details class="cmds"><summary class="cmds-label">Команды</summary>
           <div class="cmd"><span class="cn">Send File / Recv File</span><span class="cd">отправить или принять файл</span></div>
           <div class="cmd"><span class="cn">Send Cmds / Recv Cmds</span><span class="cd">обмен командами по serial-каналу</span></div>
-        </div>
+        </details>
       </div>
       <div class="app"><div class="app-name"><span class="dot"></span>Mass Storage</div>
         <p>Режим USB-флешки — доступ к SD с компьютера.</p>
