@@ -84,6 +84,13 @@
     display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   }
   .kicker::before { content: ""; width: 26px; height: 2px; background: var(--accent); display: inline-block; }
+
+  .ver-tag {
+    font-family: "IBM Plex Mono", monospace; font-weight: 700; font-size: .68rem;
+    letter-spacing: .06em; color: var(--bg);
+    background: var(--accent); padding: 3px 8px; border-radius: 3px;
+    text-transform: none;
+  }
   h1 {
     font-family: "IBM Plex Mono", monospace;
     font-weight: 700; font-size: clamp(2.1rem, 6vw, 3.4rem);
@@ -216,7 +223,7 @@
 <body>
 <header class="top">
   <div class="wrap masthead">
-    <div class="kicker">Bruce Firmware · ESP32 · Справочник функций</div>
+    <div class="kicker">Bruce Firmware · ESP32 · Справочник функций <span class="ver-tag">v1.16.1</span></div>
     <h1>Меню Bruce: что делает каждый инструмент</h1>
     <p class="lede">Прошивка <b>Bruce</b> превращает ESP32-устройство (M5Stick, Cardputer, Lilygo T-Embed и др.) в мультитул для работы с радио, RFID/NFC, ИК и сетями. Ниже — все пункты меню по категориям: коротко что делает и <b>практическое применение</b> с конкретными брелоками, картами и устройствами.</p>
     <div class="warn"><b>Только для законного использования:</b> тестируйте на своих устройствах или с письменного разрешения владельца. Атаки на чужое оборудование и сети незаконны.</div>
